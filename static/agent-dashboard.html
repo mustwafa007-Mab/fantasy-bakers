@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent dashboard — Fantasy Bakery</title>
+  <style>
+    :root {
+      --bg: #0f1218;
+      --panel: #171b24;
+      --border: #2a3142;
+      --text: #e8eaef;
+      --muted: #8b93a7;
+      --accent: #c9a227;
+      --ok: #3d9a5c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding: 1.25rem clamp(1rem, 3vw, 2rem);
+      max-width: 52rem;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    section h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+      font-weight: 600;
+    }
+    ul { margin: 0; padding-left: 1.2rem; }
+    li { margin: 0.35rem 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      margin: 0.4rem 0;
+      font-size: 0.95rem;
+    }
+    input[type="checkbox"] { accent-color: var(--ok); width: 1.05rem; height: 1.05rem; }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    button {
+      background: var(--border);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    button:hover { background: #353d52; }
+    textarea {
+      width: 100%;
+      min-height: 5.5rem;
+      margin-top: 0.5rem;
+      padding: 0.6rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      resize: vertical;
+    }
+    .saved { color: var(--ok); font-size: 0.8rem; margin-left: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+    .saved.show { opacity: 1; }
+    code { font-size: 0.88em; background: var(--bg); padding: 0.1em 0.35em; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Living agent dashboard</h1>
+  <p class="sub">Checklists persist in this browser via localStorage. Pin this tab during Cursor + Engine sessions.</p>
+
+  <section>
+    <h2>Quick links (repo paths)</h2>
+    <ul>
+      <li><code>ROLES.md</code> — roles, Zustand bridge, handoffs</li>
+      <li><code>.ai-context.md</code> — paste into Rules for AI / session context</li>
+      <li><code>public/models/</code> — GLB + 2×2 texture sheet (when added)</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Zustand bridge (engine → app)</h2>
+    <p style="margin:0 0 0.5rem; font-size:0.9rem; color:var(--muted);">Engine writes only these; Cursor reads in UI.</p>
+    <label><input type="checkbox" data-key="meshLoaded" /> <code>meshLoaded</code></label>
+    <label><input type="checkbox" data-key="rotationDeg" /> <code>rotationDeg</code> in sync / verified</label>
+    <label><input type="checkbox" data-key="facingCamera" /> <code>facingCamera</code> verified</label>
+  </section>
+
+  <section>
+    <h2>Session checklist</h2>
+    <label><input type="checkbox" data-key="ctxSynced" /> <code>.ai-context.md</code> synced with store + paths</label>
+    <label><input type="checkbox" data-key="grepAgentNote" /> Ran <code>rg "\[AGENT NOTE\]"</code> before merge</label>
+    <label><input type="checkbox" data-key="noReactInEngine" /> Engine path: no stray React coupling / only store writes</label>
+  </section>
+
+  <section>
+    <h2>Engine handoff prompt (copy)</h2>
+    <textarea id="handoff" readonly>Read `.ai-context.md`. You are the Engine. Here is the 2×2 texture sheet for the bread loaf from `/public/models/`. Set up the R3F scene with the GLB, apply this as the diffuse map, and configure lighting for a product showcase. Write `meshLoaded: true` to the Zustand store when ready.</textarea>
+    <div class="row">
+      <button type="button" id="copyHandoff">Copy prompt</button>
+      <span class="saved" id="copyFeedback">Copied</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Scratchpad</h2>
+    <textarea id="scratch" placeholder="Texture filename, branch name, blockers…"></textarea>
+    <div class="row">
+      <button type="button" id="clearScratch">Clear scratchpad</button>
+      <span class="muted" style="font-size:0.8rem;">Autosaves as you type</span>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      var PREFIX = "fb_agent_dash_";
+
+      function load(key, fallback) {
+        try {
+          var v = localStorage.getItem(PREFIX + key);
+          return v !== null ? v : fallback;
+        } catch (e) { return fallback; }
+      }
+      function save(key, value) {
+        try { localStorage.setItem(PREFIX + key, value); } catch (e) {}
+      }
+
+      document.querySelectorAll("input[type=checkbox][data-key]").forEach(function (el) {
+        var k = el.getAttribute("data-key");
+        el.checked = load("chk_" + k, "0") === "1";
+        el.addEventListener("change", function () {
+          save("chk_" + k, el.checked ? "1" : "0");
+        });
+      });
+
+      var scratch = document.getElementById("scratch");
+      scratch.value = load("scratch", "");
+      var t;
+      scratch.addEventListener("input", function () {
+        clearTimeout(t);
+        t = setTimeout(function () { save("scratch", scratch.value); }, 200);
+      });
+
+      document.getElementById("clearScratch").addEventListener("click", function () {
+        scratch.value = "";
+        save("scratch", "");
+      });
+
+      document.getElementById("copyHandoff").addEventListener("click", function () {
+        var ta = document.getElementById("handoff");
+        ta.select();
+        ta.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(ta.value).then(function () {
+          var fb = document.getElementById("copyFeedback");
+          fb.classList.add("show");
+          setTimeout(function () { fb.classList.remove("show"); }, 1500);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy AI ERP - Manager Dashboard</title>
+    <style>
+        :root {
+            --primary: #5e2a84;
+            /* Royal Purple */
+            --accent: #d4af37;
+            /* Gold */
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
+            /* USAGE OF REAL USER ASSET: Baker Image as Background */
+            background: url('/static/images/fantasy_baker.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+
+        /* Overlay for readability */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            /* Darker overlay for better contrast */
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-area img {
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .status-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            border: 1px solid #c8e6c9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            font-size: 1.4rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #8e44ad);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            button {
+                padding: 12px 15px;
+                font-size: 1rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                /* Stack cards on mobile */
+            }
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: inherit;
+        }
+
+        .status-ok {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .status-alert {
+            color: #c0392b;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .log-entry {
+            font-size: 0.9em;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        #generated-post {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <img src="/static/logo.png" alt="Fantasy Bakers Logo">
+                <h1>Fantasy AI ERP</h1>
+            </div>
+            <div>
+                <span class="status-badge">● System Online</span>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Module 1: Stock -->
+            <div class="card">
+                <h2>📦 Smart Inventory</h2>
+                <div id="stock-status">
+                    <p>Scanning predictive ledger...</p>
+                </div>
+                <button onclick="checkStock()">Run Procurement Scan</button>
+            </div>
+
+            <!-- Module 2: AI Social Pipeline -->
+            <div class="card">
+                <h2>📸 Social Media Editor</h2>
+
+                <!-- Step 1: Upload -->
+                <div style="margin-bottom: 20px;">
+                    <p style="margin: 0 0 5px 0; font-weight: bold;">1. Upload Raw Footage</p>
+                    <input type="text" id="video-desc" placeholder="Describe video (e.g. 'Staff dancing')"
+                        style="margin-bottom: 5px;">
+                    <button onclick="generatePost()" style="margin-top: 5px; background: #8e44ad;">📤 Send to
+                        Editor</button>
+                </div>
+
+                <!-- Step 2: Approval Queue -->
+                <div>
+                    <p style="margin: 0 0 5px 0; font-weight: bold;">2. Pending Approval</p>
+                    <div id="approval-queue"
+                        style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.5); border-radius: 8px; padding: 5px;">
+                        <p style="font-size: 0.9em; padding: 5px;"><i>No posts waiting.</i></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 3: Logistics -->
+            <div class="card">
+                <h2>🛺 Tuktuk Logistics</h2>
+                <p>Optimize delivery for: <b>Cafe Mocha (Customer C1)</b></p>
+                <button onclick="findTuktuk()">Dispatch AI</button>
+                <div id="delivery-result"
+                    style="margin-top: 15px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;">
+                </div>
+            </div>
+
+            <!-- Module 4: Security -->
+            <div class="card">
+                <h2>🛡️ Compliance Audit</h2>
+                <div id="audit-log"
+                    style="height: 200px; overflow-y: auto; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;">
+                    <div class="log-entry">System initialized...</div>
+                </div>
+                <button onclick="triggerAlert()" style="background: linear-gradient(135deg, #c0392b, #e74c3c);">Simulate
+                    Breach</button>
+            </div>
+
+            <!-- Module 5: Finance Import -->
+            <div class="card">
+                <h2>📂 Bookkeeping Import</h2>
+                <p>Upload Excel/Word files from accounts.</p>
+                <div
+                    style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 8px; border: 2px dashed var(--accent); text-align: center;">
+                    <input type="file" id="finance-upload" style="display: none;" onchange="handleFileUpload(this)">
+                    <label for="finance-upload" style="cursor: pointer; color: var(--primary); font-weight: bold;">
+                        📄 Click to Select File<br>
+                        <small>(.xlsx, .docx, .csv)</small>
+                    </label>
+                </div>
+                <div id="upload-result" style="margin-top: 10px; font-size: 0.9em;"></div>
+
+                <h3 style="margin-top: 20px; font-size: 1rem; border-bottom: 1px solid #eee;">Recent Auto-Recorded
+                    Entries</h3>
+                <div id="ledger-view" style="max-height: 100px; overflow-y: auto; font-size: 0.85em; color: #555;">
+                    <p><i>No files uploaded yet.</i></p>
+                </div>
+            </div>
+
+            <!-- Module 6: Baker's Calculator -->
+            <div class="card">
+                <h2>🥖 Baker's Calculator</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="target-loaves" placeholder="Target Loaves" value="500" style="width: 60%">
+                    <button onclick="calculateRecipe()" style="margin-top: 0; width: 40%;">Calculate</button>
+                </div>
+                <div id="recipe-result" style="background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;">
+                    <p>Enter quantity to see ingredients.</p>
+                </div>
+            </div>
+
+            <!-- Module 7: Shift Scheduler -->
+            <div class="card" style="grid-column: span 2;">
+                <h2>📅 Weekly Staff Roster</h2>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <thead>
+                        <tr style="background: rgba(255,255,255,0.6); text-align: left;">
+                            <th style="padding: 8px;">Day</th>
+                            <th>Time</th>
+                            <th>Driver (Logistics)</th>
+                            <th>Head Baker</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roster-body">
+                        <tr>
+                            <td colspan="4">Loading schedule...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Module 7: Live Order Board (Staff View) -->
+            <div class="card" style="grid-column: span 2; border: 2px solid var(--primary);">
+                <h2>🔔 Live Kitchen Orders</h2>
+                <div id="live-orders" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                    <p><i>Waiting for orders...</i></p>
+                </div>
+                <button onclick="loadOrders()"
+                    style="width: auto; padding: 5px 15px; font-size: 0.8em; margin-top:5px;">Refresh Orders</button>
+            </div>
+
+            <!-- Module 8: Financial Adviser -->
+            <div class="card" style="background: linear-gradient(135deg, #2c3e50, #4ca1af); color: white;">
+                <h2 style="color: #fff; border-bottom-color: rgba(255,255,255,0.3);">📈 AI Market Adviser</h2>
+                <div id="market-insight">
+                    <p>Analyzing Mombasa market data...</p>
+                </div>
+                <button onclick="loadMarketAnalysis()" style="background: rgba(255,255,255,0.2); color:white;">Analyze
+                    Competitors</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:8000';
+
+        // Auto-load all widgets
+        window.onload = function () {
+            updateLedgerView();
+            loadRoster();
+            loadOrders();
+            setInterval(loadOrders, 10000); // Auto-refresh orders every 10s
+            loadApprovalQueue();
+        };
+
+        async function loadApprovalQueue() {
+            const res = await fetch(`${API}/marketing/pending`);
+            const data = await res.json();
+            const div = document.getElementById('approval-queue');
+
+            if (data.pending && data.pending.length > 0) {
+                div.innerHTML = data.pending.map(p => `
+                    <div style="background: #fff; padding: 8px; margin-bottom: 8px; border-radius: 6px; border-left: 3px solid #f39c12; font-size: 0.9em;">
+                        <div><b>Input:</b> ${p.input_desc}</div>
+                        <div style="margin: 5px 0; font-style: italic; color: #555;">"${p.caption_swahili}"</div>
+                        <button onclick="approvePost('${p.id}')" style="margin:0; padding: 4px 10px; font-size: 0.8em; background: #27ae60; width: auto;">✅ Approve</button>
+                    </div>
+                `).join('');
+            } else {
+                div.innerHTML = '<p style="font-size: 0.9em; padding: 5px;"><i>No posts waiting.</i></p>';
+            }
+        }
+
+        async function approvePost(id) {
+            await fetch(`${API}/marketing/approve_post/${id}?manager_id=admin`, { method: 'POST' });
+            loadApprovalQueue(); // Refresh list
+        }
+
+        async function generatePost() {
+            const desc = document.getElementById('video-desc').value;
+            const btn = document.querySelector('button[onclick="generatePost()"]');
+            btn.innerText = "⏳ Processing...";
+
+            await fetch(`${API}/marketing/generate_content`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description: desc, uploader_id: 'demo' })
+            });
+
+            btn.innerText = "📤 Send to Editor";
+            document.getElementById('video-desc').value = ""; // Clear input
+            loadApprovalQueue(); // Refresh list to show new item
+        }
+        async function loadOrders() {
+            const res = await fetch(`${API}/orders/list`);
+            const data = await res.json();
+            const div = document.getElementById('live-orders');
+
+            if (data.orders && data.orders.length > 0) {
+                div.innerHTML = data.orders.map(o => `
+                        <div style="min-width: 200px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #27ae60;">
+                            <b>${o.item}</b><br>
+                            Qty: ${o.qty} <br>
+                            <small>${o.time} • ${o.customer}</small>
+                        </div>
+                    `).join('');
+            } else {
+                div.innerHTML = '<p><i>No active orders.</i></p>';
+            }
+        }
+
+        async function loadMarketAnalysis() {
+            const res = await fetch(`${API}/finance/market_analysis`);
+            const data = await res.json();
+            const div = document.getElementById('market-insight');
+            div.innerHTML = `
+                <p><b>Sentiment:</b> ${data.market_sentiment}</p>
+                <ul style="padding-left: 20px; font-size:0.9em;">
+                    ${data.competitors.map(c => `<li><b>${c.name}</b>: ${c.status}</li>`).join('')}
+                </ul>
+                <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; font-size: 0.9em;">
+                    💡 <b>Tip:</b> ${data.recommendation}
+                </div>
+            `;
+        }
+
+        async function loadRoster() {
+            const res = await fetch(`${API}/staff/roster`);
+            const data = await res.json();
+            const tbody = document.getElementById('roster-body');
+            tbody.innerHTML = data.shifts.map(s => `
+                <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <td style="padding: 8px; font-weight: bold;">${s.day}</td>
+                    <td>${s.time}</td>
+                    <td>${s.driver}</td>
+                    <td>${s.baker}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function calculateRecipe() {
+            const loaves = document.getElementById('target-loaves').value;
+            const res = await fetch(`${API}/staff/calculate_recipe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target_loaves: parseInt(loaves) })
+            });
+            const data = await res.json();
+
+            let html = `<p><strong>For ${data.target} Loaves:</strong></p><ul style="padding-left: 20px; margin: 5px 0;">`;
+            for (const [key, val] of Object.entries(data.ingredients)) {
+                html += `<li>${key}: <b>${val}</b></li>`;
+            }
+            html += '</ul>';
+            document.getElementById('recipe-result').innerHTML = html;
+        }
+
+        async function updateLedgerView() {
+            try {
+                const res = await fetch(`${API}/finance/ledger`);
+                const data = await res.json();
+                const div = document.getElementById('ledger-view');
+                if (data.ledger && data.ledger.length > 0) {
+                    div.innerHTML = data.ledger.map(entry => `
+                        <div style="padding: 5px; border-bottom: 1px solid #eee;">
+                            <b>${new Date(entry.date).toLocaleTimeString()}</b>: ${entry.source} <br>
+                            <span style="color: green;">✅ Recorded</span>
+                        </div>
+                    `).join('');
+                } else {
+                    div.innerHTML = '<p><i>No files uploaded yet.</i></p>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const div = document.getElementById('upload-result');
+            div.innerHTML = 'Uploading & Scanning...';
+
+            try {
+                const res = await fetch(`${API}/finance/upload_docs`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                div.innerHTML = `
+                    <p class="status-ok">✅ Processed & Recorded!</p>
+                `;
+                updateLedgerView(); // Refresh the list
+            } catch (e) {
+                div.innerHTML = '<p class="status-alert">❌ Upload Failed</p>';
+            }
+        }
+
+        async function checkStock() {
+            const div = document.getElementById('stock-status');
+            div.innerHTML = '<p>Scanning...</p>';
+            const res = await fetch(`${API}/inventory/predict_procurement`);
+            const data = await res.json();
+
+            if (data.alerts && data.alerts.length > 0) {
+                div.innerHTML = data.alerts.map(a =>
+                    `<p class="status-alert">⚠️ Low Stock: ${a.item_name} <br> <small>Suggested: ${a.suggested_order}kg</small></p>`
+                ).join('');
+            } else {
+                div.innerHTML = '<p class="status-ok">✅ All stock levels healthy.</p>';
+            }
+        }
+
+        async function findTuktuk() {
+            const res = await fetch(`${API}/logistics/find_best_tuktuk?customer_id=c1`);
+            const data = await res.json();
+            const div = document.getElementById('delivery-result');
+            if (data.assigned_tuktuk) {
+                div.innerHTML = `
+                    <div style="font-size: 1.1em; color: var(--primary);"><b>Driver:</b> ${data.assigned_tuktuk}</div>
+                    <div><b>Freshness Score:</b> ${data.freshness_score}/100</div>
+                    <div><b>Est. Temp:</b> ${data.estimated_temp_celsius}°C</div>
+                `;
+            } else {
+                div.innerText = 'No tuktuks available.';
+            }
+        }
+
+        async function triggerAlert() {
+            const div = document.getElementById('audit-log');
+            const time = new Date().toLocaleTimeString();
+            div.innerHTML = `<div class="log-entry" style="color:red;">⏳ [${time}] Triggering security alert...</div>` + div.innerHTML;
+
+            try {
+                const res = await fetch(`${API}/security/trigger_alert`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'Unauthorized access detected - Simulated Breach' })
+                });
+                const data = await res.json();
+                div.innerHTML = `<div class="log-entry" style="color:red;">⚠️ [${time}] SECURITY_ALERT: ${data.message || 'Breach simulated. ODPC report prepared.'}</div>` + div.innerHTML;
+            } catch(e) {
+                // Endpoint not yet wired — show client-side log entry as fallback
+                div.innerHTML = `<div class="log-entry" style="color:red;">⚠️ [${time}] SECURITY_ALERT: Unauthorized Port Scan Detected. ODPC Report Prepared.</div>` + div.innerHTML;
+            }
+        }
+    </script>
+</body>
+
+</html>
