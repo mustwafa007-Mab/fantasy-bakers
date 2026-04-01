@@ -1,0 +1,4 @@
+# Nixpacks build configuration for Railway
+# "file" Nix package provides libmagic.so which python-magic requires at runtime
+[phases.setup]
+nixPkgs = ["file"]
