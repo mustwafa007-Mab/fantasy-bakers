@@ -1,4 +1,12 @@
-# Nixpacks build configuration for Railway
-# "file" Nix package provides libmagic.so which python-magic requires at runtime
+# Railway / Nixpacks: Python on PATH + pip; `file` provides libmagic.so for python-magic.
 [phases.setup]
-nixPkgs = ["file"]
+nixPkgs = ["python311", "python311Packages.pip", "file"]
+
+[phases.install]
+cmds = ["python3 -m venv /opt/venv", ". /opt/venv/bin/activate && pip install -r requirements.txt"]
+
+[phases.build]
+cmds = []
+
+[start]
+cmd = ". /opt/venv/bin/activate && uvicorn app:app --host 0.0.0.0 --port $PORT"
