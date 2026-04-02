@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internal Admin Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: white; color: black; padding: 40px; }
+        section { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }
+        h1 { margin-top: 0; }
+        .row { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Dashboard</h1>
+        <form method="POST" action="/admin/logout">
+            <input type="hidden" name="csrf_token" id="logout-csrf">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+    <section>
+        <h2>Media Uploads</h2>
+        <!-- HERO -->
+        <form id="hero-img-form">
+            <div class="row">
+                <label>Hero Image: </label>
+                <input type="file" name="file" accept="image/jpeg,image/png,image/webp" onchange="previewUpload(this, 'hero')">
+                <input type="hidden" name="slot" value="hero">
+                <button type="button" onclick="uploadImage('hero-img-form', 'hero')">Upload</button>
+                <span id="preview-hero"></span>
+            </div>
+        </form>
+        <form id="hero-vid-form">
+            <div class="row">
+                <label>Hero Video: </label>
+                <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime" onchange="previewUpload(this, 'hero-video', true)">
+                <input type="hidden" name="slot" value="hero-video">
+                <button type="button" onclick="uploadImage('hero-vid-form', 'hero-video')">Upload</button>
+                <span id="preview-hero-video"></span>
+            </div>
+        </form>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+        <!-- WHITE BREAD -->
+        <form id="white-bread-img-form">
+            <div class="row">
+                <label>White Bread Image: </label>
+                <input type="file" name="file" accept="image/jpeg,image/png,image/webp" onchange="previewUpload(this, 'white-bread')">
+                <input type="hidden" name="slot" value="white-bread">
+                <button type="button" onclick="uploadImage('white-bread-img-form', 'white-bread')">Upload</button>
+                <span id="preview-white-bread"></span>
+            </div>
+        </form>
+        <form id="white-bread-vid-form">
+            <div class="row">
+                <label>White Bread Video: </label>
+                <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime" onchange="previewUpload(this, 'white-bread-video', true)">
+                <input type="hidden" name="slot" value="white-bread-video">
+                <button type="button" onclick="uploadImage('white-bread-vid-form', 'white-bread-video')">Upload</button>
+                <span id="preview-white-bread-video"></span>
+            </div>
+        </form>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+        <!-- SUGAR ROLLS -->
+        <form id="sugar-rolls-img-form">
+            <div class="row">
+                <label>Sugar Rolls Image: </label>
+                <input type="file" name="file" accept="image/jpeg,image/png,image/webp" onchange="previewUpload(this, 'sugar-rolls')">
+                <input type="hidden" name="slot" value="sugar-rolls">
+                <button type="button" onclick="uploadImage('sugar-rolls-img-form', 'sugar-rolls')">Upload</button>
+                <span id="preview-sugar-rolls"></span>
+            </div>
+        </form>
+        <form id="sugar-rolls-vid-form">
+            <div class="row">
+                <label>Sugar Rolls Video: </label>
+                <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime" onchange="previewUpload(this, 'sugar-rolls-video', true)">
+                <input type="hidden" name="slot" value="sugar-rolls-video">
+                <button type="button" onclick="uploadImage('sugar-rolls-vid-form', 'sugar-rolls-video')">Upload</button>
+                <span id="preview-sugar-rolls-video"></span>
+            </div>
+        </form>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+        <!-- BUNS -->
+        <form id="buns-img-form">
+            <div class="row">
+                <label>Buns Image: </label>
+                <input type="file" name="file" accept="image/jpeg,image/png,image/webp" onchange="previewUpload(this, 'buns')">
+                <input type="hidden" name="slot" value="buns">
+                <button type="button" onclick="uploadImage('buns-img-form', 'buns')">Upload</button>
+                <span id="preview-buns"></span>
+            </div>
+        </form>
+        <form id="buns-vid-form">
+            <div class="row">
+                <label>Buns Video: </label>
+                <input type="file" name="file" accept="video/mp4,video/webm,video/quicktime" onchange="previewUpload(this, 'buns-video', true)">
+                <input type="hidden" name="slot" value="buns-video">
+                <button type="button" onclick="uploadImage('buns-vid-form', 'buns-video')">Upload</button>
+                <span id="preview-buns-video"></span>
+            </div>
+        </form>
+    </section>
+
+    <section>
+        <h2>Prices</h2>
+        <div class="row">
+            <label>White Bread Price: </label>
+            <input type="number" id="price-white-bread">
+            <button onclick="saveContent('price_product1', document.getElementById('price-white-bread').value)">Save</button>
+        </div>
+        <div class="row">
+            <label>Sugar Rolls Price: </label>
+            <input type="number" id="price-sugar-rolls">
+            <button onclick="saveContent('price_product2', document.getElementById('price-sugar-rolls').value)">Save</button>
+        </div>
+        <div class="row">
+            <label>Buns Price: </label>
+            <input type="number" id="price-buns">
+            <button onclick="saveContent('price_product3', document.getElementById('price-buns').value)">Save</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>3D models (showroom GLB paths)</h2>
+        <p class="row" style="font-size:0.9rem;color:#555;">Paths are served from the Next.js site, e.g. <code>/models/white-bread.glb</code>. Leave blank for a placeholder until the file exists.</p>
+        <div class="row">
+            <label>White bread GLB URL/path: </label>
+            <input type="text" id="model-white-bread" style="width:320px" placeholder="/models/white-bread.glb">
+            <button onclick="saveContent('model_path_product1', document.getElementById('model-white-bread').value.trim())">Save</button>
+        </div>
+        <div class="row">
+            <label>Sugar rolls GLB URL/path: </label>
+            <input type="text" id="model-sugar-rolls" style="width:320px" placeholder="/models/sugar-rolls.glb">
+            <button onclick="saveContent('model_path_product2', document.getElementById('model-sugar-rolls').value.trim())">Save</button>
+        </div>
+        <div class="row">
+            <label>Buns GLB URL/path: </label>
+            <input type="text" id="model-buns" style="width:320px" placeholder="/models/buns.glb">
+            <button onclick="saveContent('model_path_product3', document.getElementById('model-buns').value.trim())">Save</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>Visibility</h2>
+        <div class="row">
+            <label><input type="checkbox" id="vis-white-bread" onchange="saveContent('vis_product1', this.checked)"> White Bread Visible</label>
+        </div>
+        <div class="row">
+            <label><input type="checkbox" id="vis-sugar-rolls" onchange="saveContent('vis_product2', this.checked)"> Sugar Rolls Visible</label>
+        </div>
+        <div class="row">
+            <label><input type="checkbox" id="vis-buns" onchange="saveContent('vis_product3', this.checked)"> Buns Visible</label>
+        </div>
+    </section>
+
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+Starting Container
+[DB] No Supabase credentials found ΓÇö using in-memory fallback (local dev mode)
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:     100.64.0.2:40248 - "GET /api/products HTTP/1.1" 404 Not Found
+INFO:     100.64.0.3:28200 - "GET / HTTP/1.1" 200 OK

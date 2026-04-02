@@ -7,6 +7,9 @@ __pycache__/
 
 # Env secrets — NEVER commit
 .env
+.env.*
+!.env.example
+*.pem
 
 # Node
 showroom/node_modules/
@@ -16,3 +19,6 @@ showroom/dist/
 .DS_Store
 desktop.ini
 Thumbs.db
+
+.vercel
+.env*.local

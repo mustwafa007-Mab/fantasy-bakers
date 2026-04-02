@@ -1,0 +1,3 @@
+# Paste your newly generated API token on the line below and save this file.
+# Make sure there are no spaces or quotes around it!
+e55df163-ed44-4f46-8c9f-81470d98da06

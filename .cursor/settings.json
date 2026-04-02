@@ -1,0 +1,19 @@
+{
+  "plugins": {
+    "cursor-team-kit": {
+      "enabled": true
+    },
+    "linear": {
+      "enabled": true
+    },
+    "firecrawl": {
+      "enabled": true
+    },
+    "supabase": {
+      "enabled": true
+    },
+    "huggingface-skills": {
+      "enabled": true
+    }
+  }
+}
