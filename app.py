@@ -335,7 +335,8 @@ async def admin_login(request: Request, password: str = Form(...)):
 @app.post("/admin/logout")
 async def admin_logout(
     request: Request,
-    __: None = Depends(verify_csrf)
+    _: None = Depends(verify_admin),
+    __: None = Depends(verify_csrf),
 ):
     ip = request.client.host if request.client else "unknown"
     audit_log("LOGOUT", ip)
