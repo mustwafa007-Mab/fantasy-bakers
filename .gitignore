@@ -22,3 +22,18 @@ Thumbs.db
 
 .vercel
 .env*.local
+
+# Debug / deploy scratch files — never commit (tokens, curl dumps, logs)
+deploy_token.txt
+curl_out.txt
+domain.txt
+login_url.txt
+full_logs.txt
+logs.txt
+logs2.txt
+status.txt
+up.log
+user_url.json
+products.json
+error.json
+admin_audit.log

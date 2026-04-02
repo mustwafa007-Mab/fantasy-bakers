@@ -1,3 +1,0 @@
-Domains already exist on the service:
-- https://api.mxtwafa.com
-- https://web-production-fd18d.up.railway.app
