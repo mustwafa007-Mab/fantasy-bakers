@@ -698,6 +698,24 @@ def _site_row() -> dict:
     return rows[0] if rows else {}
 
 
+def _format_showcase_whatsapp_message(template: str, product_name: str, price_kes: float) -> str:
+    """
+    Safe formatter for showcase CTA text.
+    Supports {product}, {name}, {price}, and {price_kes} placeholders.
+    """
+    payload = {
+        "product": product_name,
+        "name": product_name,
+        "price": f"{price_kes:.0f}",
+        "price_kes": f"{price_kes:.0f}",
+    }
+    try:
+        msg = template.format(**payload)
+    except Exception:
+        msg = f"Hi Fantasy Bakery, I'd like to order {product_name} for KES {price_kes:.0f}."
+    return sanitize(msg)[:500]
+
+
 # Stable catalog slots: CMS keys in site_content (Supabase) drive copy & prices.
 _SHOWCASE_DEFS = [
     {
@@ -743,6 +761,46 @@ _SHOWCASE_DEFS = [
         "emoji": "🫓",
     },
 ]
+
+
+@app.get("/api/showcase/product")
+def get_showcase_product():
+    """
+    Lightweight endpoint consumed by the React showroom sidebar.
+    """
+    cms = _site_row()
+    hero = _SHOWCASE_DEFS[0]
+
+    raw_name = cms.get(hero["title_key"], hero["default_title"])
+    product_name = sanitize(str(raw_name or hero["default_title"])).strip() or hero["default_title"]
+    price_kes = _safe_float(cms.get(hero["price_key"]), hero["default_price"])
+
+    whatsapp_e164 = (os.environ.get("SHOWCASE_WHATSAPP_E164", "+254700000000") or "").strip()
+    if not whatsapp_e164:
+        whatsapp_e164 = "+254700000000"
+
+    message_template = (
+        os.environ.get(
+            "SHOWCASE_WHATSAPP_MESSAGE",
+            "Hi Fantasy Bakery, I'd like to order {product} for KES {price}.",
+        )
+        or ""
+    ).strip()
+    if not message_template:
+        message_template = "Hi Fantasy Bakery, I'd like to order {product} for KES {price}."
+
+    whatsapp_message = _format_showcase_whatsapp_message(
+        template=message_template,
+        product_name=product_name,
+        price_kes=price_kes,
+    )
+
+    return {
+        "name": product_name,
+        "price_kes": price_kes,
+        "whatsapp_e164": whatsapp_e164,
+        "whatsapp_message": whatsapp_message,
+    }
 
 
 @app.get("/api/products")
